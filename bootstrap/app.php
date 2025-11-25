@@ -2,6 +2,7 @@
 
 use App\Console\Commands\ZatcaGenerateCsr;
 use App\Console\Commands\ZatcaGenerateInvoice;
+use App\Console\Commands\ZatcaGenerateInvoiceFromArray;
 use App\Console\Commands\ZatcaRequestComplianceCertificate;
 use App\Console\Commands\ZatcaSignInvoice;
 use App\Console\Commands\ZatcaSubmitInvoice;
@@ -19,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withCommands([
         ZatcaGenerateCsr::class,
         ZatcaGenerateInvoice::class,
+        ZatcaGenerateInvoiceFromArray::class,
         ZatcaRequestComplianceCertificate::class,
         ZatcaSignInvoice::class,
         ZatcaSubmitInvoice::class,

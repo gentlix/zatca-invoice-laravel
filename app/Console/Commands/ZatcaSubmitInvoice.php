@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\ZatcaSubmission;
 use DOMDocument;
 use DOMXPath;
 use GuzzleHttp\Client;
@@ -82,13 +83,54 @@ class ZatcaSubmitInvoice extends Command
             $this->info("Submitting invoice to ZATCA ({$environment})...");
             $this->info("Submission type: {$submissionType}");
 
-            $complianceResponse = $zatcaClient->compliance($signedInvoiceXml, $invoiceHash, $uuid);
+            // Extract invoice ID from filename or XML
+            $invoiceId = $this->extractInvoiceIdFromXml($signedInvoiceXml) ?? pathinfo($invoiceFileName, PATHINFO_FILENAME);
+            
+            // Create submission record
+            $submission = ZatcaSubmission::create([
+                'invoice_id' => $invoiceId,
+                'uuid' => $uuid,
+                'invoice_hash' => $invoiceHash,
+                'status' => 'pending',
+                'submission_type' => $submissionType,
+                'request_data' => [
+                    'uuid' => $uuid,
+                    'invoice_hash' => $invoiceHash,
+                    'invoice_file' => $invoiceFileName,
+                ],
+                'invoice_file_path' => $disk->path($invoiceRelativePath),
+                'signed_invoice_file_path' => $disk->path($invoiceRelativePath),
+                'environment' => $environment,
+            ]);
 
-            $this->info('Compliance submission successful!');
-            $this->line('Response:');
-            $this->line(print_r($complianceResponse, true));
+            try {
+                $complianceResponse = $zatcaClient->compliance($signedInvoiceXml, $invoiceHash, $uuid);
 
-            return SymfonyCommand::SUCCESS;
+                // Update submission with success
+                $submission->update([
+                    'status' => 'success',
+                    'response_data' => is_array($complianceResponse) ? $complianceResponse : ['response' => $complianceResponse],
+                    'zatca_request_id' => $complianceResponse['requestId'] ?? $complianceResponse['request_id'] ?? null,
+                    'validation_status' => $complianceResponse['validationStatus'] ?? $complianceResponse['validation_status'] ?? null,
+                    'validation_errors' => $complianceResponse['validationErrors'] ?? $complianceResponse['validation_errors'] ?? null,
+                ]);
+
+                $this->info('✓ Compliance submission successful!');
+                $this->line('Response:');
+                $this->line(print_r($complianceResponse, true));
+                $this->info("Submission logged to database (ID: {$submission->id})");
+
+                return SymfonyCommand::SUCCESS;
+            } catch (ZatcaApiException $e) {
+                // Update submission with error
+                $submission->update([
+                    'status' => 'failed',
+                    'error_message' => $e->getMessage(),
+                    'response_data' => method_exists($e, 'getContext') ? $e->getContext() : null,
+                ]);
+
+                throw $e;
+            }
         } catch (ZatcaApiException $e) {
             $this->error('API Error: '.$e->getMessage());
             if (method_exists($e, 'getContext')) {
@@ -151,6 +193,28 @@ class ZatcaSubmitInvoice extends Command
         }
 
         throw new \RuntimeException('Invoice hash not found in signed XML');
+    }
+
+    /**
+     * Extract invoice ID from XML
+     */
+    private function extractInvoiceIdFromXml(string $xml): ?string
+    {
+        try {
+            $doc = new DOMDocument();
+            $doc->loadXML($xml);
+            $xpath = new DOMXPath($doc);
+            $xpath->registerNamespace('cbc', 'urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2');
+            
+            $idNodes = $xpath->query('//cbc:ID');
+            if ($idNodes->length > 0) {
+                return $idNodes->item(0)->nodeValue;
+            }
+        } catch (\Exception $e) {
+            // Ignore errors
+        }
+        
+        return null;
     }
 }
 

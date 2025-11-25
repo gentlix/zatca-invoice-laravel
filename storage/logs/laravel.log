@@ -49,3 +49,4 @@
 #18 C:\\_\\Workspace\\zatca-laravel\\artisan(11): Illuminate\\Foundation\\Application->handleCommand(Object(Symfony\\Component\\Console\\Input\\ArgvInput))
 #19 {main}
 "} 
+[2025-11-25 12:13:55] local.ERROR: Failed to extract QR code: You need to install the imagick extension to use this back end  
