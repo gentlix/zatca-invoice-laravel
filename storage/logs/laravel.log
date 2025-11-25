@@ -1,0 +1,51 @@
+[2025-11-25 11:37:01] production.ERROR: The C:\_\Workspace\zatca-laravel\bootstrap\cache directory must be present and writable. {"exception":"[object] (Exception(code: 0): The C:\\_\\Workspace\\zatca-laravel\\bootstrap\\cache directory must be present and writable. at C:\\_\\Workspace\\zatca-laravel\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\PackageManifest.php:179)
+[stacktrace]
+#0 C:\\_\\Workspace\\zatca-laravel\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\PackageManifest.php(132): Illuminate\\Foundation\\PackageManifest->write(Array)
+#1 C:\\_\\Workspace\\zatca-laravel\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\PackageManifest.php(108): Illuminate\\Foundation\\PackageManifest->build()
+#2 C:\\_\\Workspace\\zatca-laravel\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\PackageManifest.php(91): Illuminate\\Foundation\\PackageManifest->getManifest()
+#3 C:\\_\\Workspace\\zatca-laravel\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\PackageManifest.php(80): Illuminate\\Foundation\\PackageManifest->config('aliases')
+#4 C:\\_\\Workspace\\zatca-laravel\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Bootstrap\\RegisterFacades.php(26): Illuminate\\Foundation\\PackageManifest->aliases()
+#5 C:\\_\\Workspace\\zatca-laravel\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(342): Illuminate\\Foundation\\Bootstrap\\RegisterFacades->bootstrap(Object(Illuminate\\Foundation\\Application))
+#6 C:\\_\\Workspace\\zatca-laravel\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(474): Illuminate\\Foundation\\Application->bootstrapWith(Array)
+#7 C:\\_\\Workspace\\zatca-laravel\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(196): Illuminate\\Foundation\\Console\\Kernel->bootstrap()
+#8 C:\\_\\Workspace\\zatca-laravel\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(1235): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#9 C:\\_\\Workspace\\zatca-laravel\\artisan(11): Illuminate\\Foundation\\Application->handleCommand(Object(Symfony\\Component\\Console\\Input\\ArgvInput))
+#10 {main}
+"} 
+[2025-11-25 11:37:03] production.ERROR: The C:\_\Workspace\zatca-laravel\bootstrap\cache directory must be present and writable. {"exception":"[object] (Exception(code: 0): The C:\\_\\Workspace\\zatca-laravel\\bootstrap\\cache directory must be present and writable. at C:\\_\\Workspace\\zatca-laravel\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\PackageManifest.php:179)
+[stacktrace]
+#0 C:\\_\\Workspace\\zatca-laravel\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\PackageManifest.php(132): Illuminate\\Foundation\\PackageManifest->write(Array)
+#1 C:\\_\\Workspace\\zatca-laravel\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\PackageManifest.php(108): Illuminate\\Foundation\\PackageManifest->build()
+#2 C:\\_\\Workspace\\zatca-laravel\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\PackageManifest.php(91): Illuminate\\Foundation\\PackageManifest->getManifest()
+#3 C:\\_\\Workspace\\zatca-laravel\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\PackageManifest.php(80): Illuminate\\Foundation\\PackageManifest->config('aliases')
+#4 C:\\_\\Workspace\\zatca-laravel\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Bootstrap\\RegisterFacades.php(26): Illuminate\\Foundation\\PackageManifest->aliases()
+#5 C:\\_\\Workspace\\zatca-laravel\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(342): Illuminate\\Foundation\\Bootstrap\\RegisterFacades->bootstrap(Object(Illuminate\\Foundation\\Application))
+#6 C:\\_\\Workspace\\zatca-laravel\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(474): Illuminate\\Foundation\\Application->bootstrapWith(Array)
+#7 C:\\_\\Workspace\\zatca-laravel\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(196): Illuminate\\Foundation\\Console\\Kernel->bootstrap()
+#8 C:\\_\\Workspace\\zatca-laravel\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(1235): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#9 C:\\_\\Workspace\\zatca-laravel\\artisan(11): Illuminate\\Foundation\\Application->handleCommand(Object(Symfony\\Component\\Console\\Input\\ArgvInput))
+#10 {main}
+"} 
+[2025-11-25 11:38:37] production.ERROR: file_get_contents(C:\_\Workspace\zatca-laravel\.env): Failed to open stream: No such file or directory {"exception":"[object] (ErrorException(code: 0): file_get_contents(C:\\_\\Workspace\\zatca-laravel\\.env): Failed to open stream: No such file or directory at C:\\_\\Workspace\\zatca-laravel\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\KeyGenerateCommand.php:100)
+[stacktrace]
+#0 C:\\_\\Workspace\\zatca-laravel\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Bootstrap\\HandleExceptions.php(258): Illuminate\\Foundation\\Bootstrap\\HandleExceptions->handleError(2, 'file_get_conten...', 'C:\\\\_\\\\Workspace\\\\...', 100)
+#1 [internal function]: Illuminate\\Foundation\\Bootstrap\\HandleExceptions->Illuminate\\Foundation\\Bootstrap\\{closure}(2, 'file_get_conten...', 'C:\\\\_\\\\Workspace\\\\...', 100)
+#2 C:\\_\\Workspace\\zatca-laravel\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\KeyGenerateCommand.php(100): file_get_contents('C:\\\\_\\\\Workspace\\\\...')
+#3 C:\\_\\Workspace\\zatca-laravel\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\KeyGenerateCommand.php(82): Illuminate\\Foundation\\Console\\KeyGenerateCommand->writeNewEnvironmentFileWith('base64:G3F+9Q1p...')
+#4 C:\\_\\Workspace\\zatca-laravel\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\KeyGenerateCommand.php(47): Illuminate\\Foundation\\Console\\KeyGenerateCommand->setKeyInEnvironmentFile('base64:G3F+9Q1p...')
+#5 C:\\_\\Workspace\\zatca-laravel\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\BoundMethod.php(36): Illuminate\\Foundation\\Console\\KeyGenerateCommand->handle()
+#6 C:\\_\\Workspace\\zatca-laravel\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Util.php(43): Illuminate\\Container\\BoundMethod::Illuminate\\Container\\{closure}()
+#7 C:\\_\\Workspace\\zatca-laravel\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\BoundMethod.php(95): Illuminate\\Container\\Util::unwrapIfClosure(Object(Closure))
+#8 C:\\_\\Workspace\\zatca-laravel\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\BoundMethod.php(35): Illuminate\\Container\\BoundMethod::callBoundMethod(Object(Illuminate\\Foundation\\Application), Array, Object(Closure))
+#9 C:\\_\\Workspace\\zatca-laravel\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(696): Illuminate\\Container\\BoundMethod::call(Object(Illuminate\\Foundation\\Application), Array, Array, NULL)
+#10 C:\\_\\Workspace\\zatca-laravel\\vendor\\laravel\\framework\\src\\Illuminate\\Console\\Command.php(213): Illuminate\\Container\\Container->call(Array)
+#11 C:\\_\\Workspace\\zatca-laravel\\vendor\\symfony\\console\\Command\\Command.php(318): Illuminate\\Console\\Command->execute(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
+#12 C:\\_\\Workspace\\zatca-laravel\\vendor\\laravel\\framework\\src\\Illuminate\\Console\\Command.php(182): Symfony\\Component\\Console\\Command\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
+#13 C:\\_\\Workspace\\zatca-laravel\\vendor\\symfony\\console\\Application.php(1073): Illuminate\\Console\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#14 C:\\_\\Workspace\\zatca-laravel\\vendor\\symfony\\console\\Application.php(356): Symfony\\Component\\Console\\Application->doRunCommand(Object(Illuminate\\Foundation\\Console\\KeyGenerateCommand), Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#15 C:\\_\\Workspace\\zatca-laravel\\vendor\\symfony\\console\\Application.php(195): Symfony\\Component\\Console\\Application->doRun(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#16 C:\\_\\Workspace\\zatca-laravel\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(198): Symfony\\Component\\Console\\Application->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#17 C:\\_\\Workspace\\zatca-laravel\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(1235): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#18 C:\\_\\Workspace\\zatca-laravel\\artisan(11): Illuminate\\Foundation\\Application->handleCommand(Object(Symfony\\Component\\Console\\Input\\ArgvInput))
+#19 {main}
+"} 

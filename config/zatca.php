@@ -1,87 +1,66 @@
 <?php
 
+use Illuminate\Support\Env;
+
 return [
+
     /*
     |--------------------------------------------------------------------------
     | ZATCA Environment
     |--------------------------------------------------------------------------
     |
-    | Options: 'sandbox', 'simulation', 'production'
+    | The environment for ZATCA integration. Options: 'sandbox', 'production'
     |
     */
-    'environment' => env('ZATCA_ENVIRONMENT', 'sandbox'),
+
+    'environment' => Env::get('ZATCA_ENVIRONMENT', 'sandbox'),
 
     /*
     |--------------------------------------------------------------------------
-    | Organization Details
+    | Organization Information
     |--------------------------------------------------------------------------
     |
-    | Your organization information for certificate generation
+    | Your organization details as registered with ZATCA
     |
     */
+
     'organization' => [
-        'identifier' => env('ZATCA_ORG_IDENTIFIER', '399999999900003'),
-        'name' => env('ZATCA_ORG_NAME', 'My Company'),
-        'unit_name' => env('ZATCA_ORG_UNIT', 'IT Department'),
-        'address' => env('ZATCA_ORG_ADDRESS', 'Riyadh, Saudi Arabia'),
-        'country' => env('ZATCA_ORG_COUNTRY', 'SA'),
-        'business_category' => env('ZATCA_BUSINESS_CATEGORY', 'Technology'),
+        'identifier' => Env::get('ZATCA_ORGANIZATION_IDENTIFIER', '15 digits'),
+        'name' => Env::get('ZATCA_ORGANIZATION_NAME', 'Company Name'),
+        'unit' => Env::get('ZATCA_ORGANIZATION_UNIT', 'Auction System'),
+        'common_name' => Env::get('ZATCA_COMMON_NAME', 'Auction System'),
+        'country_code' => Env::get('ZATCA_COUNTRY_CODE', 'SA'),
+        'address' => Env::get('ZATCA_ADDRESS', 'Riyadh King Fahd Road'),
+        'business_category' => Env::get('ZATCA_BUSINESS_CATEGORY', 'Online Auction and E-Commerce Services'),
+        'building_number' => Env::get('ZATCA_BUILDING_NUMBER', '8008'),
+        'city_subdivision_name' => Env::get('ZATCA_CITY_SUBDIVISION_NAME', 'Al Olaya'),
+        'city' => Env::get('ZATCA_CITY', 'Riyadh'),
+        'postal_code' => Env::get('ZATCA_POSTAL_CODE', '12345'),
+        'registration_number' => Env::get('ZATCA_REGISTRATION_NUMBER', '10 digits'),
     ],
 
     /*
     |--------------------------------------------------------------------------
-    | Certificate Details
+    | Device/Solution Information
     |--------------------------------------------------------------------------
     |
-    | Certificate generation settings
+    | Information about your solution/device
     |
     */
-    'certificate' => [
-        'solution_name' => env('ZATCA_SOLUTION_NAME', 'Laravel ZATCA'),
-        'model' => env('ZATCA_MODEL', 'Web'),
-        'serial_number' => env('ZATCA_SERIAL_NUMBER', 'LARAVEL001'),
-        'invoice_type' => env('ZATCA_INVOICE_TYPE', 1100), // 1100 = Standard + Simplified
-        'production' => env('ZATCA_PRODUCTION', false),
+
+    'device' => [
+        'solution_name' => Env::get('ZATCA_SOLUTION_NAME', 'Auction System'),
+        'model' => Env::get('ZATCA_SOLUTION_MODEL', 'v1.0'),
+        'serial_number' => Env::get('ZATCA_DEVICE_SERIAL_NUMBER', 'serial number here'),
     ],
 
     /*
     |--------------------------------------------------------------------------
-    | Storage Paths
+    | Helper Methods
     |--------------------------------------------------------------------------
-    |
-    | Paths relative to storage/app/
-    |
     */
-    'paths' => [
-        'certificates' => 'zatca/certificates',
-        'invoices' => 'zatca/invoices',
-        'invoices_signed' => 'zatca/invoices/signed',
-        'qr_codes' => 'zatca/qr_codes',
-        'logs' => 'zatca/logs',
-    ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | API Settings
-    |--------------------------------------------------------------------------
-    |
-    | ZATCA API configuration
-    |
-    */
-    'api' => [
-        'timeout' => env('ZATCA_API_TIMEOUT', 30),
-        'retry_attempts' => env('ZATCA_API_RETRY', 3),
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | OTP Code
-    |--------------------------------------------------------------------------
-    |
-    | OTP code for requesting compliance certificate from ZATCA
-    | Get this from ZATCA portal after uploading CSR
-    |
-    */
-    'otp' => env('ZATCA_OTP', null),
+    'is_production' => Env::get('ZATCA_ENVIRONMENT', 'sandbox') === 'production',
+    'currency' => Env::get('ZATCA_CURRENCY', 'SAR'),
+    'invoice_type' => Env::get('ZATCA_INVOICE_TYPE', '1100'),
 ];
-

@@ -1,22 +1,31 @@
 {
-    "name": "zatca/laravel-integration",
-    "description": "Laravel integration for ZATCA e-invoicing",
+    "name": "laravel/zatca-laravel",
     "type": "project",
+    "description": "Laravel application with ZATCA integration",
+    "keywords": ["laravel", "zatca"],
+    "license": "MIT",
     "require": {
-        "php": "^8.1",
-        "saleh7/php-zatca-xml": "*",
-        "laravel/framework": "^10.0",
-        "laravel/sanctum": "^3.2",
-        "laravel/tinker": "^2.8"
+        "php": "^8.2",
+        "guzzlehttp/guzzle": "^7.10",
+        "laravel/framework": "^11.0",
+        "laravel/tinker": "^2.9",
+        "sevaske/php-zatca-xml": "^3.4",
+        "symfony/polyfill-ctype": "^1.33",
+        "symfony/polyfill-intl-grapheme": "^1.33",
+        "symfony/polyfill-intl-idn": "^1.33",
+        "symfony/polyfill-intl-normalizer": "^1.33",
+        "symfony/polyfill-mbstring": "^1.33",
+        "symfony/polyfill-php80": "^1.33",
+        "symfony/polyfill-php83": "^1.33",
+        "symfony/polyfill-uuid": "^1.33"
     },
     "require-dev": {
-        "fakerphp/faker": "^1.9.1",
-        "laravel/pint": "^1.0",
-        "laravel/sail": "^1.18",
-        "mockery/mockery": "^1.4.4",
-        "nunomaduro/collision": "^7.0",
-        "phpunit/phpunit": "^10.1",
-        "spatie/laravel-ignition": "^2.0"
+        "fakerphp/faker": "^1.23",
+        "laravel/pint": "^1.13",
+        "laravel/sail": "^1.26",
+        "mockery/mockery": "^1.6",
+        "nunomaduro/collision": "^8.0",
+        "phpunit/phpunit": "^11.0"
     },
     "autoload": {
         "psr-4": {
@@ -42,7 +51,8 @@
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
         ],
         "post-create-project-cmd": [
-            "@php artisan key:generate --ansi"
+            "@php artisan key:generate --ansi",
+            "@php -r \"file_exists('database/database.sqlite') || touch('database/database.sqlite');\""
         ]
     },
     "extra": {
@@ -59,7 +69,6 @@
             "php-http/discovery": true
         }
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "prefer-stable": true
 }
-

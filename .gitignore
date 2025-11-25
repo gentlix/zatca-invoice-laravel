@@ -1,5 +1,5 @@
-# Laravel Framework
 /node_modules
+/public/build
 /public/hot
 /public/storage
 /storage/*.key
@@ -7,8 +7,6 @@
 .env
 .env.backup
 .env.production
-.env.local
-.env.*.local
 .phpunit.result.cache
 Homestead.json
 Homestead.yaml
@@ -18,94 +16,4 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
-
-# Laravel Storage (keep directory structure)
-/storage/app/*
-!/storage/app/.gitkeep
-!/storage/app/certificates/.gitkeep
-!/storage/app/qr_codes/.gitkeep
-!/storage/app/invoices/.gitkeep
-
-# ZATCA Specific - Sensitive Certificate Files
-/storage/app/certificates/*.pem
-/storage/app/certificates/*.key
-/storage/app/certificates/*.crt
-/storage/app/certificates/*.csr
-/storage/app/certificates/*.pfx
-/storage/app/certificates/*.p12
-!/storage/app/certificates/.gitkeep
-
-# ZATCA Generated Files
-/storage/app/qr_codes/*
-!/storage/app/qr_codes/.gitkeep
-/storage/app/invoices/*
-!/storage/app/invoices/.gitkeep
-
-# Logs
-/storage/logs/*
-!/storage/logs/.gitkeep
-*.log
-
-# Temporary Files
-/storage/app/temp_openssl.cnf
-*.tmp
-*.temp
-*.swp
-*.swo
-*~
-
-# OS Files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-desktop.ini
-
-# IDE Files
-.idea/
-.vscode/
-*.sublime-project
-*.sublime-workspace
-.project
-.classpath
-.settings/
-*.iml
-*.ipr
-*.iws
-
-# PHPStorm
-.idea/
-
-# VS Code
-.vscode/
-*.code-workspace
-
-# Composer
-/vendor/
-composer.phar
-composer.lock
-
-# NPM
-node_modules/
-package-lock.json
-yarn.lock
-
-# Build Files
-/public/build/
-/public/mix-manifest.json
-
-# Testing
-/.phpunit.cache
-/phpunit.xml
-.phpunit.result.cache
-coverage/
-.nyc_output/
-
-# Backup Files
-*.bak
-*.backup
-*~
 
