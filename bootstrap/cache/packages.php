@@ -1,4 +1,11 @@
 <?php return array (
+  'laravel/sail' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'Laravel\\Sail\\SailServiceProvider',
+    ),
+  ),
   'laravel/sanctum' => 
   array (
     'providers' => 
@@ -20,6 +27,13 @@
       0 => 'Carbon\\Laravel\\ServiceProvider',
     ),
   ),
+  'nunomaduro/collision' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
+    ),
+  ),
   'nunomaduro/termwind' => 
   array (
     'providers' => 
@@ -27,15 +41,15 @@
       0 => 'Termwind\\Laravel\\TermwindServiceProvider',
     ),
   ),
-  'simplesoftwareio/simple-qrcode' => 
+  'spatie/laravel-ignition' => 
   array (
     'aliases' => 
     array (
-      'QrCode' => 'SimpleSoftwareIO\\QrCode\\Facades\\QrCode',
+      'Flare' => 'Spatie\\LaravelIgnition\\Facades\\Flare',
     ),
     'providers' => 
     array (
-      0 => 'SimpleSoftwareIO\\QrCode\\QrCodeServiceProvider',
+      0 => 'Spatie\\LaravelIgnition\\IgnitionServiceProvider',
     ),
   ),
 );

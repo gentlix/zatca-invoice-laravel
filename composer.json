@@ -1,17 +1,13 @@
 {
-    "name": "zatca/invoice-system",
+    "name": "zatca/laravel-integration",
+    "description": "Laravel integration for ZATCA e-invoicing",
     "type": "project",
-    "description": "ZATCA E-Invoicing Integration System",
-    "keywords": ["laravel", "zatca", "e-invoice", "fatoora"],
-    "license": "MIT",
     "require": {
         "php": "^8.1",
-        "guzzlehttp/guzzle": "^7.8",
-        "laravel/framework": "^10.10",
+        "saleh7/php-zatca-xml": "*",
+        "laravel/framework": "^10.0",
         "laravel/sanctum": "^3.2",
-        "laravel/tinker": "^2.8",
-        "ramsey/uuid": "^4.7",
-        "simplesoftwareio/simple-qrcode": "^4.2"
+        "laravel/tinker": "^2.8"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",
@@ -63,7 +59,7 @@
             "php-http/discovery": true
         }
     },
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "prefer-stable": true
 }
 

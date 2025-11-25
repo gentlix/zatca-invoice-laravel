@@ -1,475 +1,421 @@
-# ZATCA E-Invoicing Integration System
+# ZATCA E-Invoicing Laravel Integration
 
-A complete Laravel-based system for integrating ZATCA (Saudi Arabia Tax Authority) Phase 2 e-invoicing requirements, including XML generation, certificate signing, QR code generation, and API submission.
+A complete Laravel integration for ZATCA (Saudi Arabia) e-invoicing system. This project provides certificate management, invoice generation, signing, QR code generation, and API submission capabilities.
 
 ## Features
 
-- ✅ Generate Certificate Signing Request (CSR)
-- ✅ Create unsigned and signed XML invoices (UBL 2.1 compliant)
-- ✅ Sign invoices using CSID certificate
-- ✅ Generate QR codes with TLV encoding
-- ✅ Submit invoices to ZATCA Compliance API
-- ✅ Comprehensive logging system
-- ✅ Support for Sandbox and Production environments
-- ✅ Two sample invoices for testing
-- ✅ Interactive web test interface
+- Generate CSR and request ZATCA compliance certificate
+- Create unsigned invoices (Simplified and Standard)
+- Sign invoices with ZATCA certificate
+- Generate QR codes for invoices
+- Submit invoices to ZATCA API
+- Log all API responses to database
+- Clean generated files with a single command
 
 ## Requirements
 
-- PHP 8.1 or higher
-- Laravel 10.x
-- MySQL/MariaDB
-- OpenSSL extension
+- PHP >= 8.1
+- Laravel >= 10.0
 - Composer
-- ZIP extension (for Composer)
-- GD extension (optional, for QR codes)
+- OpenSSL extension
+- MySQL/MariaDB (for logging)
 
 ## Installation
 
-### Step 1: Install PHP Extensions
+1. **Install dependencies:**
+   ```bash
+   composer install
+   ```
 
-Open `C:\xampp\php\php.ini` (or your PHP ini file) and enable:
+2. **Copy environment file:**
+   ```bash
+   cp env.template .env
+   ```
 
-```ini
-extension=openssl
-extension=zip
-extension=gd
-extension=pdo_mysql
-extension=mbstring
-```
+3. **Generate application key:**
+   ```bash
+   php artisan key:generate
+   ```
 
-Restart your web server after making changes.
+4. **Configure `.env` file:**
+   - Update database credentials
+   - Configure ZATCA settings (see Configuration section)
 
-### Step 2: Install Dependencies
+5. **Run migrations:**
+   ```bash
+   php artisan migrate
+   ```
 
-```bash
-php composer.phar install --no-dev --ignore-platform-req=ext-gd
-```
+## Configuration
 
-**Note:** Use `--ignore-platform-req=ext-gd` if GD extension is not enabled (QR codes won't work, but everything else will).
+### Environment Variables
 
-### Step 3: Environment Setup
-
-Copy `.env.example` to `.env` (if not exists):
-
-```bash
-# Windows
-copy .env.example .env
-
-# Linux/Mac
-cp .env.example .env
-```
-
-Generate application key:
-
-```bash
-php artisan key:generate
-```
-
-### Step 4: Configure Environment
-
-Edit `.env` and update:
+Edit your `.env` file with the following ZATCA settings:
 
 ```env
-APP_NAME="ZATCA Invoice System"
-APP_ENV=local
-APP_DEBUG=true
-APP_URL=http://localhost:8000
-
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=zatca_invoice
-DB_USERNAME=root
-DB_PASSWORD=your_password
-
-# ZATCA Configuration
+# ZATCA Environment: sandbox, simulation, or production
 ZATCA_ENVIRONMENT=sandbox
-ZATCA_SANDBOX_URL=https://gw-apic-gov.gazt.gov.sa/e-invoicing/developer-portal
-ZATCA_PRODUCTION_URL=https://gw-apic-gov.gazt.gov.sa/e-invoicing/core
-ZATCA_CLIENT_ID=your_client_id
-ZATCA_CLIENT_SECRET=your_client_secret
+
+# Organization Details
+ZATCA_ORG_IDENTIFIER=399999999900003  # 15 digits, starting and ending with 3
+ZATCA_ORG_NAME=My Company
+ZATCA_ORG_UNIT=IT Department
+ZATCA_ORG_ADDRESS=1234 Main St, Riyadh
+ZATCA_ORG_COUNTRY=SA
+ZATCA_BUSINESS_CATEGORY=Technology
+
+# Certificate Details
+ZATCA_SOLUTION_NAME=POS
+ZATCA_MODEL=A1
+ZATCA_SERIAL_NUMBER=98765
+ZATCA_INVOICE_TYPE=1100  # 1000=Simplified, 1100=Standard+Simplified
+ZATCA_PRODUCTION=false
+
+# API Settings
+ZATCA_API_TIMEOUT=30
+ZATCA_API_RETRY=3
+
+# OTP Code (optional, can be provided as command argument)
+ZATCA_OTP=123123
 ```
 
-### Step 5: Create Database
+### Configuration File
 
-```sql
-CREATE DATABASE zatca_invoice CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-```
-
-### Step 6: Run Migrations
-
-```bash
-php artisan migrate
-```
-
-### Step 7: Start Development Server
-
-**Option 1: Laravel Artisan (Recommended)**
-```bash
-php artisan serve
-```
-
-**Option 2: PHP Built-in Server**
-```bash
-cd public
-php -S localhost:8000
-```
-
-**Option 3: XAMPP/WAMP**
-- Place project in `htdocs` folder
-- Access via: `http://localhost/zatca_invoice/public`
-
-Server will be available at: **http://localhost:8000**
-
-## Quick Start Commands
-
-```bash
-# Install dependencies
-php composer.phar install --no-dev --ignore-platform-req=ext-gd
-
-# Generate app key
-php artisan key:generate
-
-# Run migrations
-php artisan migrate
-
-# Start server
-php artisan serve
-```
+All ZATCA settings are managed in `config/zatca.php`. You can override these values using environment variables.
 
 ## Usage
 
-### Web Test Interface
+### 1. Generate Certificate
 
-Access the interactive test interface:
-```
-http://localhost:8000/test-page
-```
-
-This page allows you to:
-- Generate CSR with a form
-- Process sample invoices with buttons
-- View submission logs in a table
-- See real-time results
-
-### API Endpoints
-
-#### 1. Generate CSR
+Generate CSR and private key for ZATCA certificate:
 
 ```bash
-POST http://localhost:8000/zatca/generate-csr
-Content-Type: application/json
-
-{
-    "name": "Your Company Name",
-    "vat_number": "123456789100003",
-    "city": "Riyadh",
-    "state": "Riyadh",
-    "email": "info@example.com"
-}
+php artisan zatca:generate-certificate
 ```
 
-**Response:**
-- CSR content (submit to ZATCA portal)
-- Private key path (already saved)
-- Instructions for certificate installation
+This creates:
+- `storage/app/zatca/certificates/certificate.csr`
+- `storage/app/zatca/certificates/private.pem`
 
-**Next Steps:**
-1. Copy the CSR content
-2. Submit it to ZATCA portal to get your certificate
-3. Save certificate to: `storage/app/certificates/cert.pem`
-4. Private key is already at: `storage/app/certificates/private_key.pem`
+**Next steps:**
+1. Upload the CSR file to ZATCA portal
+2. Get the OTP from ZATCA
+3. Run the next command
 
-#### 2. Process Sample Invoice 1
+### 2. Request Compliance Certificate
+
+Request compliance certificate from ZATCA using the OTP:
 
 ```bash
-GET http://localhost:8000/zatca/process-invoice-1
+php artisan zatca:request-compliance-certificate {otp}
 ```
 
-**What it does:**
-1. Generates unsigned XML (UBL 2.1)
-2. Signs XML with certificate
-3. Generates QR code
-4. Submits to ZATCA API
-5. Logs response to database
-
-**Response includes:**
-- Invoice UUID
-- Unsigned XML path
-- Signed XML path
-- QR code path
-- ZATCA API submission result
-
-#### 3. Process Sample Invoice 2
+Or set OTP in `.env` file and run without argument:
 
 ```bash
-GET http://localhost:8000/zatca/process-invoice-2
+php artisan zatca:request-compliance-certificate
 ```
 
-Same process as Invoice 1, with different invoice data.
+Replace `{otp}` with the OTP received from ZATCA portal.
 
-#### 4. View Logs
+This saves:
+- `storage/app/zatca/certificates/ZATCA_certificate_data.json`
+
+### 3. Generate Sample Invoices
+
+Generate sample unsigned invoices:
 
 ```bash
-GET http://localhost:8000/zatca/logs
+php artisan zatca:generate-sample-invoices
 ```
 
-**Query Parameters:**
-- `?status=success` - Filter by success
-- `?status=error` - Filter by error
-- `?invoice_uuid=xxx` - Filter by UUID
+This creates:
+- Simplified Invoice (unsigned) - `storage/app/zatca/invoices/unsigned_Simplified_Invoice_*.xml`
+- Standard Invoice (unsigned) - `storage/app/zatca/invoices/unsigned_Standard_Invoice_*.xml`
 
-#### 5. Get Log Details
+Note: Generated invoices are prefixed with `unsigned_` for easy identification.
+
+### 4. Sign Invoices
+
+Sign all unsigned invoices with ZATCA certificate:
 
 ```bash
-GET http://localhost:8000/zatca/logs/{id}
+php artisan zatca:sign-invoices
 ```
+
+Or sign a specific invoice:
+
+```bash
+php artisan zatca:sign-invoices --file=Simplified_Invoice_*.xml
+```
+
+This creates:
+- Signed invoices - `storage/app/zatca/invoices/signed/signed_*.xml`
+- QR codes - `storage/app/zatca/qr_codes/signed_*.txt`
+
+### 5. Submit Invoice to ZATCA
+
+Submit a signed invoice to ZATCA API:
+
+```bash
+php artisan zatca:submit-invoice {invoice_uuid}
+```
+
+Replace `{invoice_uuid}` with the UUID of the invoice you want to submit.
+
+The API response is automatically logged to the `zatca_logs` table.
+
+### 6. Clean Generated Files
+
+Clean generated files to free up storage:
+
+```bash
+# Clean only invoices
+php artisan zatca:clean --invoices
+
+# Clean only QR codes
+php artisan zatca:clean --qr-codes
+
+# Clean only certificates (with confirmation)
+php artisan zatca:clean --certificates
+
+# Clean everything
+php artisan zatca:clean --all
+```
+
+## Available Commands
+
+| Command | Description |
+|---------|-------------|
+| `zatca:generate-certificate` | Generate CSR and private key |
+| `zatca:request-compliance-certificate {otp?}` | Request compliance certificate from ZATCA |
+| `zatca:generate-sample-invoices` | Generate sample simplified and standard invoices |
+| `zatca:sign-invoices {--file=}` | Sign unsigned invoices and generate QR codes |
+| `zatca:submit-invoice {uuid}` | Submit signed invoice to ZATCA API |
+| `zatca:clean {--invoices\|--qr-codes\|--certificates\|--all}` | Clean generated files |
 
 ## Project Structure
 
 ```
-zatca_invoice/
-├── app/
-│   ├── Data/
-│   │   └── SampleInvoices.php          # Two sample invoices
-│   ├── Http/
-│   │   ├── Controllers/
-│   │   │   ├── ZatcaController.php      # Main API controller
-│   │   │   ├── TestController.php      # System status page
-│   │   │   └── TestPageController.php   # Test interface controller
-│   │   └── Middleware/                  # Laravel middleware
-│   ├── Models/
-│   │   └── ZatcaLog.php                 # Log model
-│   └── Services/Zatca/
-│       ├── CertificateService.php       # CSR & certificate management
-│       ├── XmlService.php               # XML generation & signing
-│       ├── QrCodeService.php            # QR code generation
-│       └── ZatcaApiService.php          # ZATCA API integration
-├── config/
-│   ├── zatca.php                        # ZATCA configuration
-│   └── [other Laravel configs]
-├── database/
-│   └── migrations/
-│       └── create_zatca_logs_table.php  # Logs table migration
-├── public/
-│   └── index.php                        # Entry point
-├── resources/
-│   └── views/
-│       ├── test.blade.php               # System status page
-│       └── test-page.blade.php          # Test interface
-├── routes/
-│   └── web.php                          # API routes
-└── storage/
-    ├── app/
-    │   ├── certificates/                # Certificate storage
-    │   ├── invoices/                     # Invoice XML storage
-    │   └── qr_codes/                     # QR code storage
-    └── logs/                             # Application logs
+app/
+├── Services/
+│   ├── ZatcaCertificateService.php    # Certificate generation and management
+│   ├── ZatcaInvoiceService.php        # Invoice generation from arrays
+│   ├── ZatcaSigningService.php        # Invoice signing and QR code generation
+│   └── ZatcaApiService.php            # ZATCA API integration
+├── Models/
+│   └── ZatcaLog.php                   # API response logging model
+└── Console/Commands/
+    ├── GenerateCertificate.php
+    ├── RequestComplianceCertificate.php
+    ├── GenerateSampleInvoices.php
+    ├── SignInvoices.php
+    ├── SubmitInvoice.php
+    └── CleanZatcaFiles.php
+
+config/
+└── zatca.php                          # ZATCA configuration
+
+database/migrations/
+└── 2024_01_01_000001_create_zatca_logs_table.php
+
+routes/
+├── web.php                            # Web routes (default Laravel)
+├── api.php                            # API routes (default Laravel)
+└── console.php                        # Console routes
 ```
 
-## Sample Invoices
+## File Storage
 
-### Invoice 1 (INV-001)
-- **Type**: Standard Invoice
-- **Items**: 2 products
-- **Subtotal**: 400.00 SAR
-- **VAT**: 60.00 SAR (15%)
-- **Total**: 460.00 SAR
-- **Buyer**: Customer Name (Jeddah)
-
-### Invoice 2 (INV-002)
-- **Type**: Standard Invoice
-- **Items**: 3 services
-- **Subtotal**: 625.00 SAR
-- **VAT**: 93.75 SAR (15%)
-- **Total**: 718.75 SAR
-- **Buyer**: Another Customer (Dammam)
-
-## Configuration
-
-### ZATCA Settings (config/zatca.php)
-
-All settings can be overridden via `.env`:
-
-- `ZATCA_ENVIRONMENT`: `sandbox` or `production`
-- `ZATCA_SANDBOX_URL`: Sandbox API URL
-- `ZATCA_PRODUCTION_URL`: Production API URL
-- `ZATCA_CLIENT_ID`: API client ID
-- `ZATCA_CLIENT_SECRET`: API client secret
-- Certificate and key paths
-
-## Invoice Processing Flow
+All ZATCA-related files are stored in `storage/app/zatca/`:
 
 ```
-1. Input: Invoice Data (PHP Array)
-   ↓
-2. Generate Unsigned XML (UBL 2.1)
-   ├── Create XML structure
-   ├── Add seller/buyer info
-   ├── Add line items
-   ├── Calculate totals
-   └── Generate UUID
-   ↓
-3. Sign XML (PKI)
-   ├── Load certificate
-   ├── Create signature
-   ├── Calculate hash
-   └── Embed signature
-   ↓
-4. Generate QR Code
-   ├── Encode TLV format
-   ├── Include hash
-   └── Generate PNG image
-   ↓
-5. Submit to ZATCA
-   ├── Get OAuth token
-   ├── POST signed XML
-   ├── Receive response
-   └── Log to database
-   ↓
-6. Output: Results
-   ├── File paths
-   ├── Submission status
-   └── Log entry
+zatca/
+├── certificates/
+│   ├── certificate.csr                # Certificate Signing Request
+│   ├── private.pem                    # Private key
+│   └── ZATCA_certificate_data.json    # Certificate data from ZATCA
+├── invoices/
+│   ├── unsigned_Simplified_Invoice_*.xml  # Unsigned invoices
+│   └── unsigned_Standard_Invoice_*.xml
+├── invoices/signed/
+│   ├── signed_Simplified_Invoice_*.xml    # Signed invoices
+│   └── signed_Standard_Invoice_*.xml
+└── qr_codes/
+    ├── signed_Simplified_Invoice_*.txt  # QR codes (base64)
+    └── signed_Standard_Invoice_*.txt
 ```
 
 ## Database Schema
 
 ### zatca_logs Table
 
-| Column | Type | Description |
-|--------|------|-------------|
-| `id` | bigint | Primary key |
-| `invoice_uuid` | string | Invoice UUID |
-| `invoice_number` | string | Invoice number |
-| `request_xml` | text | Full request XML |
-| `response` | json | API response data |
-| `status_code` | integer | HTTP status code |
-| `status` | string | success/error/warning |
-| `error_message` | text | Error message (if any) |
-| `created_at` | timestamp | Creation time |
-| `updated_at` | timestamp | Update time |
+Logs all API requests and responses:
+
+- `id` - Primary key
+- `endpoint` - API endpoint called
+- `request_data` - JSON request data
+- `response_data` - JSON response data
+- `status` - Request status (success/error)
+- `error_message` - Error message if failed
+- `created_at` - Timestamp
+- `updated_at` - Timestamp
+
+## Complete Workflow
+
+Here's the complete workflow from certificate generation to invoice submission:
+
+```bash
+# Step 1: Generate certificate
+php artisan zatca:generate-certificate
+
+# Step 2: Upload CSR to ZATCA portal and get OTP
+# (Manual step on ZATCA website)
+
+# Step 3: Request compliance certificate
+php artisan zatca:request-compliance-certificate {otp}
+
+# Step 4: Generate invoices
+php artisan zatca:generate-sample-invoices
+
+# Step 5: Sign invoices
+php artisan zatca:sign-invoices
+
+# Step 6: Submit to ZATCA
+php artisan zatca:submit-invoice {uuid}
+
+# Optional: Clean generated files
+php artisan zatca:clean --invoices --qr-codes
+```
+
+## Customizing Invoice Data
+
+To customize invoice data, edit the methods in `app/Services/ZatcaInvoiceService.php`:
+
+- `getSampleSimplifiedInvoice()` - Returns simplified invoice array
+- `getSampleStandardInvoice()` - Returns standard invoice array
+
+These methods return PHP arrays that are automatically converted to ZATCA-compliant XML.
 
 ## Production Setup
 
-### 1. Environment Configuration
+For production environment:
 
-Update `.env`:
+1. **Update `.env`:**
+   ```env
+   ZATCA_ENVIRONMENT=production
+   ZATCA_PRODUCTION=true
+   ```
 
-```env
-APP_ENV=production
-APP_DEBUG=false
-ZATCA_ENVIRONMENT=production
-ZATCA_CLIENT_ID=your_production_client_id
-ZATCA_CLIENT_SECRET=your_production_client_secret
-```
+2. **Update organization details** with your actual business information
 
-### 2. Certificate Setup
+3. **Generate production certificate:**
+   - Use the same workflow but with production environment
+   - Request production certificate from ZATCA portal
 
-1. Generate CSR using `/zatca/generate-csr` endpoint
-2. Submit CSR to ZATCA portal
-3. Download production certificate
-4. Save to `storage/app/certificates/cert.pem`
-5. Ensure private key is secure
-
-### 3. Security Checklist
-
-- [ ] Production certificates installed
-- [ ] Private keys secured
-- [ ] Environment variables configured
-- [ ] Database credentials secure
-- [ ] SSL certificate installed
-- [ ] Error logging configured
-- [ ] Backup strategy in place
-- [ ] APP_DEBUG=false in production
+4. **Security considerations:**
+   - Never commit `.env` file
+   - Never commit certificate files or private keys
+   - Use secure file permissions (600 for private keys)
+   - Encrypt certificates at rest
+   - Implement access controls
 
 ## Troubleshooting
 
-### Certificate Issues
-- Verify certificate is in PEM format
-- Check file permissions
-- Ensure certificate matches private key
-- Verify certificate hasn't expired
+### Certificate generation fails
+- Check OpenSSL extension is enabled: `php -m | grep openssl`
+- Verify write permissions on `storage/app/zatca/certificates/`
+- On Windows, ensure OpenSSL is properly configured or set `OPENSSL_CONF` environment variable
 
-### API Connection Issues
-- Verify API credentials in `.env`
-- Check network connectivity
-- Review error logs in database
-- Test with sandbox first
+### Signing fails
+- Verify `ZATCA_certificate_data.json` exists in certificates directory
+- Check certificate hasn't expired
+- Verify invoice XML is valid
+- Ensure private key file exists and is readable
 
-### XML Validation Errors
-- Ensure all required fields are present
-- Verify UBL 2.1 schema compliance
-- Check namespaces and encoding
-- Validate against ZATCA schema
+### API submission fails
+- Check network connectivity to ZATCA servers
+- Verify environment settings (sandbox/simulation/production)
+- Check certificate is valid and authentication is working
+- Review API logs in `zatca_logs` table
+- Review Laravel logs: `storage/logs/laravel.log`
+- Verify invoice hash is correctly extracted from signed XML
 
-### Database Connection
-- Verify credentials in `.env`
-- Ensure MySQL is running
-- Check database exists
-- Verify user permissions
+### QR code not generated
+- Verify certificate is valid and not expired
+- Check invoice XML structure is correct
+- Review signing service logs
 
-### Missing Extensions
-- Check `php -m` for loaded extensions
-- Enable in `php.ini`
-- Restart web server
+### 401 Unauthorized errors
+- Verify certificate format is correct (base64 encoded in JSON)
+- Check certificate and secret are valid
+- Ensure authentication header format is correct
+- Verify environment matches certificate type (sandbox/simulation/production)
 
-## Dependencies
+## API Logging
 
-- `laravel/framework`: ^10.10
-- `ramsey/uuid`: ^4.7 (UUID generation)
-- `simplesoftwareio/simple-qrcode`: ^4.2 (QR codes)
-- `guzzlehttp/guzzle`: ^7.8 (HTTP client)
+All API calls are automatically logged to the `zatca_logs` table. You can query them:
 
-## API Endpoints Summary
+```php
+use App\Models\ZatcaLog;
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/` | API information |
-| GET | `/test` | System status page |
-| GET | `/test-page` | Interactive test interface |
-| POST | `/zatca/generate-csr` | Generate CSR |
-| GET | `/zatca/process-invoice-1` | Process sample invoice 1 |
-| GET | `/zatca/process-invoice-2` | Process sample invoice 2 |
-| GET | `/zatca/logs` | View all logs |
-| GET | `/zatca/logs/{id}` | Get log details |
+// Get all logs
+$logs = ZatcaLog::all();
 
-## Web Pages
+// Get failed submissions
+$failed = ZatcaLog::where('status', 'error')->get();
 
-- **http://localhost:8000/** - API information (JSON)
-- **http://localhost:8000/test** - System status page
-- **http://localhost:8000/test-page** - Interactive test interface
+// Get logs for specific endpoint
+$certLogs = ZatcaLog::where('endpoint', 'request_compliance_certificate')->get();
+```
 
-## File Storage
+## Security Best Practices
 
-- **Certificates**: `storage/app/certificates/`
-- **Invoices**: `storage/app/invoices/`
-- **QR Codes**: `storage/app/qr_codes/`
-- **Logs**: `storage/logs/laravel.log`
+1. **Never commit sensitive files:**
+   - `.env`
+   - Certificate files (`*.pem`, `*.csr`, `*.json`)
+   - Private keys
 
-## Security Notes
+2. **File permissions:**
+   ```bash
+   chmod 600 storage/app/zatca/certificates/private.pem
+   chmod 644 storage/app/zatca/certificates/certificate.csr
+   ```
 
-- Never commit `.env` file
-- Keep certificates and private keys secure
-- Use environment variables for sensitive data
-- Implement proper access controls in production
-- Certificates are excluded from git (.gitignore)
+3. **Environment variables:**
+   - Use different credentials for development and production
+   - Rotate API secrets regularly
+   - Use secure secret management
+
+4. **Monitoring:**
+   - Monitor API usage and failures
+   - Set up alerts for certificate expiration
+   - Track invoice submission success rates
+
+## File Naming Conventions
+
+- **Unsigned invoices:** Prefixed with `unsigned_` (e.g., `unsigned_Simplified_Invoice_20251124.xml`)
+- **Signed invoices:** Prefixed with `signed_` (e.g., `signed_Simplified_Invoice_20251124.xml`)
+- **QR codes:** Same name as signed invoice but with `.txt` extension
+
+This naming convention makes it easy to identify file status and clean up specific file types.
+
+## Next Steps
+
+- Implement ICV (Invoice Counter) management
+- Add PIH (Previous Invoice Hash) tracking
+- Create web interface for invoice management
+- Add invoice validation before submission
+- Implement retry logic for failed submissions
+- Set up monitoring and alerts
+- Add unit tests
 
 ## Support
 
-- **ZATCA Developer Portal**: https://zatca.gov.sa
-- **Laravel Documentation**: https://laravel.com/docs
-- **UBL 2.1 Specification**: OASIS standard
+- **ZATCA Portal:** https://zatca.gov.sa
+- **Package Documentation:** Check `vendor/saleh7/php-zatca-xml` for detailed API documentation
 
 ## License
 
-MIT
+This project uses Laravel framework and the `saleh7/php-zatca-xml` package. Please refer to their respective licenses.
 
-## Version
-
-1.0.0
-
----
-
-**Quick Start**: Install dependencies → Generate key → Run migrations → Start server → Visit `/test-page` to test!

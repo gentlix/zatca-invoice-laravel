@@ -6,27 +6,23 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('zatca_logs', function (Blueprint $table) {
             $table->id();
-            $table->string('invoice_uuid')->nullable()->index();
-            $table->string('invoice_number')->nullable();
-            $table->longText('request_xml')->nullable();
-            $table->longText('response')->nullable();
-            $table->integer('status_code')->nullable();
-            $table->string('status')->nullable()->index(); // success, error, warning
+            $table->string('endpoint');
+            $table->json('request_data')->nullable();
+            $table->json('response_data')->nullable();
+            $table->string('status')->default('pending');
             $table->text('error_message')->nullable();
             $table->timestamps();
+
+            $table->index('endpoint');
+            $table->index('status');
+            $table->index('created_at');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('zatca_logs');
