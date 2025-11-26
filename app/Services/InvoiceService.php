@@ -229,14 +229,7 @@ class InvoiceService
             ->setSignature($signature);
 
         // === 12. Generate XML ===
-        $generator = GeneratorInvoice::invoice($invoice);
-        
-        // Use reflection to get the XML string
-        $reflection = new \ReflectionClass($generator);
-        $xmlProperty = $reflection->getProperty('generatedXml');
-        $xmlProperty->setAccessible(true);
-        
-        return $xmlProperty->getValue($generator);
+        return GeneratorInvoice::invoice($invoice, $invoiceData['currency'] ?? Config::get('zatca.currency', 'SAR'))->getXML();
     }
 }
 

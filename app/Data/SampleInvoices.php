@@ -5,7 +5,7 @@ namespace App\Data;
 class SampleInvoices
 {
     /**
-     * Get sample invoice 1 data
+     * Get sample invoice 1 data - STANDARD INVOICE
      */
     public static function getInvoice1(): array
     {
@@ -13,7 +13,7 @@ class SampleInvoices
             'invoice_id' => 'INV-001',
             'uuid' => null, // Will be auto-generated
             'issue_date' => now()->toDateTimeString(),
-            'invoice_type' => 'simplified',
+            'invoice_type' => 'standard', // STANDARD INVOICE
             'is_third_party' => false,
             'currency' => 'SAR',
             'tax_percent' => 15,
@@ -88,7 +88,7 @@ class SampleInvoices
     }
 
     /**
-     * Get sample invoice 2 data
+     * Get sample invoice 2 data - SIMPLIFIED INVOICE
      */
     public static function getInvoice2(): array
     {
@@ -96,7 +96,7 @@ class SampleInvoices
             'invoice_id' => 'INV-002',
             'uuid' => null, // Will be auto-generated
             'issue_date' => now()->toDateTimeString(),
-            'invoice_type' => 'simplified',
+            'invoice_type' => 'simplified', // SIMPLIFIED INVOICE
             'is_third_party' => false,
             'currency' => 'SAR',
             'tax_percent' => 15,

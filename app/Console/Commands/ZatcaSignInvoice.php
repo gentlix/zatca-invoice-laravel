@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Services\QrCodeService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage as LaravelStorage;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
@@ -18,111 +17,136 @@ class ZatcaSignInvoice extends Command
      *
      * @var string
      */
-    protected $signature = 'zatca:sign-invoice {invoiceFile=Simplified_Invoice.xml : The invoice XML file to sign}';
+    protected $signature = 'zatca:sign-invoice';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Sign ZATCA invoice XML with the compliance certificate';
+    protected $description = 'Sign both Standard and Simplified ZATCA invoices with the compliance certificate';
 
     /**
      * Execute the console command.
      */
     public function handle(): int
     {
-        try {
-            $invoiceFileName = $this->argument('invoiceFile');
-            $disk = LaravelStorage::disk('local');
-            $directory = 'zatca/output';
-            $disk->makeDirectory($directory);
+        $this->info('Signing both Standard and Simplified invoices...');
+        $this->newLine();
 
-            $invoiceRelativePath = $directory.'/'.$invoiceFileName;
-            if (! $disk->exists($invoiceRelativePath)) {
-                $this->error("Invoice file not found: {$invoiceFileName}");
+        $disk = LaravelStorage::disk('local');
+        $directory = 'zatca/output';
+        $disk->makeDirectory($directory);
 
-                return SymfonyCommand::FAILURE;
+        // Load certificate once for both invoices
+        $certificateJsonPath = $directory.'/ZATCA_certificate_data.json';
+        if (! $disk->exists($certificateJsonPath)) {
+            $this->error('Certificate data not found. Request a compliance certificate first.');
+            return SymfonyCommand::FAILURE;
+        }
+
+        $privateKeyPath = $disk->path($directory.'/private.pem');
+        if (! $disk->exists($directory.'/private.pem')) {
+            $this->error('Private key not found. Generate it via `php artisan zatca:generate-csr`.');
+            return SymfonyCommand::FAILURE;
+        }
+
+        $zatcaStorage = new ZatcaStorage();
+        $certificateAbsolutePath = $disk->path($certificateJsonPath);
+        $jsonCertificate = $zatcaStorage->get($certificateAbsolutePath);
+        $jsonData = json_decode($jsonCertificate, true, 512, JSON_THROW_ON_ERROR);
+
+        $certificateContent = $jsonData['certificate'] ?? null;
+        $secret = $jsonData['secret'] ?? null;
+
+        if (! $certificateContent || ! $secret) {
+            $this->error('Invalid certificate data file.');
+            return SymfonyCommand::FAILURE;
+        }
+
+        $privateKey = file_get_contents($privateKeyPath);
+        $cleanPrivateKey = trim(str_replace(
+            ["-----BEGIN PRIVATE KEY-----", "-----END PRIVATE KEY-----", "\r", "\n"],
+            '',
+            $privateKey
+        ));
+
+        $certificate = new Certificate($certificateContent, $cleanPrivateKey, $secret);
+        $this->info('Certificate and private key loaded successfully.');
+        $this->newLine();
+
+        $successCount = 0;
+        $failCount = 0;
+
+        // Define invoices to sign
+        $invoicesToSign = [
+            'Standard_Invoice.xml' => 'Standard',
+            'Simplified_Invoice.xml' => 'Simplified',
+        ];
+
+        // Also check for array-generated invoices
+        if ($disk->exists($directory.'/Invoice_INV-001.xml')) {
+            $invoicesToSign['Invoice_INV-001.xml'] = 'Standard (Array)';
+        }
+        if ($disk->exists($directory.'/Invoice_INV-002.xml')) {
+            $invoicesToSign['Invoice_INV-002.xml'] = 'Simplified (Array)';
+        }
+
+        foreach ($invoicesToSign as $invoiceFileName => $invoiceLabel) {
+            try {
+                $invoiceRelativePath = $directory.'/'.$invoiceFileName;
+                if (! $disk->exists($invoiceRelativePath)) {
+                    $this->warn("  ⚠ {$invoiceLabel} invoice not found: {$invoiceFileName}");
+                    continue;
+                }
+
+                $this->info("📄 Signing {$invoiceLabel} Invoice: {$invoiceFileName}");
+
+                $invoiceAbsolutePath = $disk->path($invoiceRelativePath);
+                $xmlInvoice = $zatcaStorage->get($invoiceAbsolutePath);
+
+                $this->info('  Signing the invoice...');
+                $signer = InvoiceSigner::signInvoice($xmlInvoice, $certificate);
+                $signedInvoice = $signer->getXML();
+
+                $signedFileName = str_replace('.xml', '_signed.xml', $invoiceFileName);
+                $signedRelativePath = $directory.'/'.$signedFileName;
+                $disk->put($signedRelativePath, $signedInvoice);
+
+                // Generate and save QR code image
+                $this->info('  Generating QR code image...');
+                $invoiceId = pathinfo($invoiceFileName, PATHINFO_FILENAME);
+                $qrCodeBase64 = $signer->getQRCode();
+                $qrCodePath = $this->generateQrCodeImage($qrCodeBase64, $invoiceId, $disk, $directory);
+
+                if ($qrCodePath) {
+                    $this->info("  ✓ QR code image saved to: {$qrCodePath}");
+                } else {
+                    $this->warn('  ⚠ Could not generate QR code image.');
+                }
+
+                $this->info("  ✓ {$invoiceLabel} Invoice signed successfully!");
+                $this->info("    Signed invoice: {$signedFileName}");
+                $successCount++;
+                $this->newLine();
+            } catch (\Throwable $e) {
+                $this->error("  ✗ Error signing {$invoiceLabel} invoice: ".$e->getMessage());
+                $this->line("    File: {$e->getFile()}:{$e->getLine()}");
+                $failCount++;
+                $this->newLine();
             }
+        }
 
-            $certificateJsonPath = $directory.'/ZATCA_certificate_data.json';
-            if (! $disk->exists($certificateJsonPath)) {
-                $this->error('Certificate data not found. Request a compliance certificate first.');
-
-                return SymfonyCommand::FAILURE;
+        // Summary
+        $this->info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+        if ($successCount > 0) {
+            $this->info("✓ Successfully signed {$successCount} invoice(s)!");
+            if ($failCount > 0) {
+                $this->warn("⚠ {$failCount} invoice(s) failed to sign");
             }
-
-            $zatcaStorage = new ZatcaStorage();
-            $invoiceAbsolutePath = $disk->path($invoiceRelativePath);
-            $certificateAbsolutePath = $disk->path($certificateJsonPath);
-
-            $this->info("Loading unsigned invoice: {$invoiceFileName}");
-            $xmlInvoice = $zatcaStorage->get($invoiceAbsolutePath);
-
-            $jsonCertificate = $zatcaStorage->get($certificateAbsolutePath);
-            $jsonData = json_decode($jsonCertificate, true, 512, JSON_THROW_ON_ERROR);
-
-            $certificateContent = $jsonData['certificate'] ?? null;
-            $secret = $jsonData['secret'] ?? null;
-
-            if (! $certificateContent || ! $secret) {
-                $this->error('Invalid certificate data file.');
-
-                return SymfonyCommand::FAILURE;
-            }
-
-            $this->info('Certificate loaded successfully.');
-
-            $privateKeyPath = $disk->path($directory.'/private.pem');
-            if (! $disk->exists($directory.'/private.pem')) {
-                $this->error('Private key not found. Generate it via `php artisan zatca:generate-csr`.');
-
-                return SymfonyCommand::FAILURE;
-            }
-
-            $privateKey = file_get_contents($privateKeyPath);
-            $cleanPrivateKey = trim(str_replace(
-                ["-----BEGIN PRIVATE KEY-----", "-----END PRIVATE KEY-----", "\r", "\n"],
-                '',
-                $privateKey
-            ));
-
-            $this->info('Private key loaded.');
-            $certificate = new Certificate($certificateContent, $cleanPrivateKey, $secret);
-
-            $this->info('Signing the invoice...');
-            $signer = InvoiceSigner::signInvoice($xmlInvoice, $certificate);
-            $signedInvoice = $signer->getXML();
-
-            $signedFileName = str_replace('.xml', '_signed.xml', $invoiceFileName);
-            $signedRelativePath = $directory.'/'.$signedFileName;
-            $disk->put($signedRelativePath, $signedInvoice);
-
-            // Generate and save QR code image
-            $this->info('Generating QR code image...');
-            $invoiceId = pathinfo($invoiceFileName, PATHINFO_FILENAME);
-            
-            // Get QR code base64 from signer
-            // The base64 string is what should be encoded in the QR code
-            $qrCodeBase64 = $signer->getQRCode();
-            
-            // Generate QR code image from base64 string
-            $qrCodePath = $this->generateQrCodeImage($qrCodeBase64, $invoiceId, $disk, $directory);
-            
-            if ($qrCodePath) {
-                $this->info('✓ QR code image saved to: '.$qrCodePath);
-            } else {
-                $this->warn('Could not generate QR code image.');
-            }
-
-            $this->info('Invoice signed successfully!');
-            $this->info('Signed invoice saved to: '.$disk->path($signedRelativePath));
-
             return SymfonyCommand::SUCCESS;
-        } catch (\Throwable $e) {
-            $this->error('Error: '.$e->getMessage());
-            $this->line('Debug: '.$e->getFile().':'.$e->getLine());
-
+        } else {
+            $this->error("✗ No invoices were signed. {$failCount} failed.");
             return SymfonyCommand::FAILURE;
         }
     }
@@ -166,15 +190,14 @@ class ZatcaSignInvoice extends Command
                 ->generate($qrCodeBase64, $svgPath);
             
             if (file_exists($svgPath)) {
-                $this->info('Note: QR code saved as SVG. Install imagick extension for PNG format.');
+                $this->line('    Note: QR code saved as SVG. Install imagick extension for PNG format.');
                 return $svgPath;
             }
             
             return null;
         } catch (\Exception $e) {
-            $this->error('Failed to generate QR code: '.$e->getMessage());
+            $this->error('    Failed to generate QR code: '.$e->getMessage());
             return null;
         }
     }
 }
-

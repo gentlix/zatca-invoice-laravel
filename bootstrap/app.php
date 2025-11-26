@@ -1,5 +1,6 @@
 <?php
 
+use App\Console\Commands\ZatcaCleanHistory;
 use App\Console\Commands\ZatcaGenerateCsr;
 use App\Console\Commands\ZatcaGenerateInvoice;
 use App\Console\Commands\ZatcaGenerateInvoiceFromArray;
@@ -18,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withCommands([
+        ZatcaCleanHistory::class,
         ZatcaGenerateCsr::class,
         ZatcaGenerateInvoice::class,
         ZatcaGenerateInvoiceFromArray::class,
